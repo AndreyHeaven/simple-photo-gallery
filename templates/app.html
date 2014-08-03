@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title></title>
+   	<link rel='stylesheet' href='static/css/style.css'>
+
+</head>
+<body>
+{% set classs = ['one','two','three'] %}
+{% for item in dirnames %}
+<div class='stack{{rand(classs)}}'>
+<a href="/{{ item }}">
+    <img src="/folder_icon/{{item}}.jpg"/>
+    <div class="desc">{{ item }}</div>
+    </a>
+</div>
+{% endfor %}
+</body>
+</html>

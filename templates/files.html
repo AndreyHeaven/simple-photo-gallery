@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title></title>
+{#    <link rel="stylesheet" href="/static/css/blueimp-gallery.min.css">#}
+    <link rel="stylesheet" href="http://blueimp.github.io/Gallery/css/blueimp-gallery.min.css">
+    <link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/themes/south-street/jquery-ui.css" id="theme">
+</head>
+<body>
+{#<a href="javascript:blueimp.Gallery($('#links a'), {})">123</a>#}
+<div id="links" style="display: none">
+    {% for item in files %}
+    <a href="/files/{{ folder }}/{{ item }}" title="{{ folder }} / {{ item }}">
+        <img src="/thumbnails/{{ folder }}/{{ item }}" alt="{{ item }}">
+    </a>
+    {% endfor %}
+</div>
+<div id="blueimp-gallery" class="blueimp-gallery">
+    <div class="slides"></div>
+    <h3 class="title"></h3>
+    <a class="prev">‹</a>
+    <a class="next">›</a>
+    <a class="close">×</a>
+    <a class="play-pause"></a>
+{#    <ol class="indicator"></ol>#}
+</div>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.0/jquery.min.js"></script>
+<script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js"></script>
+<script src="http://blueimp.github.io/Gallery/js/jquery.blueimp-gallery.min.js"></script>
+{#<script src="/static/js/jquery.image-gallery.min.js"></script>#}
+<script>
+document.getElementById('links').onclick = function (event) {
+    event = event || window.event;
+    var target = event.target || event.srcElement,
+        link = target.src ? target.parentNode : target,
+        options = {index: link, event: event},
+        links = this.getElementsByTagName('a');
+    blueimp.Gallery(links, options);
+};
+$(function(){
+  blueimp.Gallery($('#links a'), {});
+})
+</script>
+</body>
+</html>
