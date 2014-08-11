@@ -32,13 +32,13 @@ a {
 }
 
 /*СТОПКИ*/
-div[class*='stack'] {
+div[class*='folder'] {
     float: left;
     position: relative;
     margin: 50px;
 }
 
-div[class*='stack'], div[class*='stack']:before, div[class*='stack']:after {
+div[class*='folder'], div[class*='folder']:before, div[class*='folder']:after {
     border: 6px solid #fff;
     height: 210px;
     width: 280px;
@@ -47,7 +47,26 @@ div[class*='stack'], div[class*='stack']:before, div[class*='stack']:after {
     box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
 }
 
-div[class*='stack']:before, div[class*='stack']:after {
+div[class*='file'] {
+    float: left;
+    position: relative;
+    margin: 50px;
+    border: 6px solid #fff;
+    width: 292px;
+    height: 292px;
+
+    -webkit-box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
+    -moz-box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
+}
+div.file img{
+    display: block;
+    margin: auto;
+}
+div.selected{
+    border-color: red;
+}
+div[class*='folder']:before, div[class*='folder']:after {
     background: #768590;
     content: "";
     position: absolute;
@@ -59,23 +78,23 @@ div[class*='stack']:before, div[class*='stack']:after {
     border: none\9;
 }
 
-div[class*='stack']:before {
+div[class*='folder']:before {
     background: #eff4de;
 }
 
 /*ПЕРВАЯ СТОПКА*/
-.stackone:before {
+.folderone:before {
     top: 4px;
     left: -6px;
 }
 
-.stackone:after {
+.folderone:after {
     top: -2px;
     left: -6px;
 }
 
 /*ВТОРАЯ СТОПКА*/
-.stacktwo:before {
+.foldertwo:before {
     top: 0px;
     left: -10px;
     -webkit-transform: rotate(-5deg);
@@ -85,7 +104,7 @@ div[class*='stack']:before {
     transform: rotate(-5deg);
 }
 
-.stacktwo:after {
+.foldertwo:after {
     top: 5px;
     left: 0px;
     -webkit-transform: rotate(4deg);
@@ -96,7 +115,7 @@ div[class*='stack']:before {
 }
 
 /*ТРЕТЬЯ СТОПКА*/
-.stackthree:before {
+.folderthree:before {
     top: 5px;
     left: -15px;
     z-index: -1;
@@ -107,7 +126,7 @@ div[class*='stack']:before {
     transform: rotate(-10deg);
 }
 
-.stackthree:after {
+.folderthree:after {
     top: -2px;
     left: -10px;
     -webkit-transform: rotate(-5deg);
