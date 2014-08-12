@@ -5,12 +5,14 @@
     <title>Simple Photo Gallery</title>
     {#    <link rel="stylesheet" href="/static/css/blueimp-gallery.min.css">#}
     <link rel='stylesheet' href='/static/css/style.css'>
+    <link rel='stylesheet' href='/css/css.css'>
     <link rel="stylesheet" href="http://blueimp.github.io/Gallery/css/blueimp-gallery.min.css">
     <link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/themes/south-street/jquery-ui.css"
           id="theme">
     <!-- Latest compiled and minified CSS -->
     <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
-
+    <link rel='shortcut icon' type='image/x-icon' href="/static/favicon.ico">
+    <link rel='icon' type='image/x-icon' href="/static/favicon.ico">
 </head>
 <body>
 {#<div class="container-fluid">#}
@@ -29,11 +31,11 @@
         {#        <li class="active">Data</li>#}
     </ol>
 {% endif %}
-{% set classs = ['one','two','three'] %}
+{% set classs = range(11) %}
 {% for item in folders %}
     <a href="{{ item }}/">
-        <div class='folder{{ rand(classs) }}'>
-            <img src="/folder_icon/{{ item }}.jpg"/>
+        <div class='folder_{{ rand(classs) }}'>
+            <img src="/folder_icon/{{ folder }}{{ item }}/folder.jpg"/>
 
             <div class="desc">{{ item }}</div>
         </div>
@@ -72,8 +74,7 @@
         }
         function updateSelectedCounter() {
             var json = getSelected();
-            if (json && json.length && json.length > 0)
-                $('#selected-value').text(json.length);
+            $('#selected-value').text(json.length);
             $('#links a').each(function () {
                 $(this).find('div.file').removeClass('selected');
                 if ($.inArray($(this).attr('title'), json) >= 0)

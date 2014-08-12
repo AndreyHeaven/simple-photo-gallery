@@ -40,8 +40,9 @@ div[class*='folder'] {
 
 div[class*='folder'], div[class*='folder']:before, div[class*='folder']:after {
     border: 6px solid #fff;
-    height: 210px;
-    width: 280px;
+    background-color: #fff;
+    height: 292px;
+    width: 292px;
     -webkit-box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
     -moz-box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
     box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
@@ -59,9 +60,11 @@ div[class*='file'] {
     -moz-box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
     box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
 }
-div.file img{
+div[class*='folder'] img, div.file img{
     display: block;
     margin: auto;
+    max-width: 280px;
+    max-height: 280px;
 }
 div.selected{
     border-color: red;
@@ -139,7 +142,7 @@ div[class*='folder']:before {
 .desc {
     position: absolute;
     bottom: 0;
-    background-color: white;
+    background-color: rgba(255, 255, 255, 0.6);
     width: 100%;
     padding-top: 5px;
     padding-bottom: 5px;
