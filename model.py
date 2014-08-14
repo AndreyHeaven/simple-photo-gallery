@@ -1,6 +1,12 @@
+import os
 from digikam_gallery import db
 
 __author__ = 'araigorodskiy'
+
+class AlbumRoots(db.Model):
+    __tablename__ = 'AlbumRoots'
+    id = db.Column(db.Integer, primary_key=True)
+    specificPath = db.Column(db.Text())
 
 
 class Albums(db.Model):
@@ -8,6 +14,8 @@ class Albums(db.Model):
     # albumRoot = db.relationship("Albums", foreign_keys=[albumRoot_id])
     relativePath = db.Column(db.Text())
     icon_id = db.Column('icon', db.Integer, db.ForeignKey('images.id'))
+    albumRoot_id = db.Column('albumRoot', db.Integer, db.ForeignKey(AlbumRoots.id))
+    albumRoot = db.relationship("AlbumRoots", backref="children", remote_side=AlbumRoots.id)
 
     def get_link(self):
         return '%d/' % self.id
@@ -15,9 +23,10 @@ class Albums(db.Model):
     def get_name(self):
         return self.relativePath[1:]
 
+    def get_path(self):
+        return '%s%s' %(self.albumRoot.specificPath, self.relativePath)
 
-Albums.albumRoot_id = db.Column('albumRoot', db.Integer, db.ForeignKey(Albums.id))
-Albums.albumRoot = db.relationship("Albums", backref="children", remote_side=Albums.id)
+
 
 
 class Images(db.Model):
@@ -27,12 +36,17 @@ class Images(db.Model):
     album_id = db.Column('album', db.Integer, db.ForeignKey('albums.id'))
     album = db.relationship("Albums", backref="images", remote_side=Albums.id, foreign_keys=[album_id])
 
-    def get_path(self):
-        return self.album.albumRoot.relativePath + self.album.relativePath + '/' + self.name
+    def get_relativePath(self):
+        return self.album.relativePath + '/' + self.name
+
+    def get_specificPath(self):
+        return self.album.albumRoot.specificPath + self.album.relativePath + '/' + self.name
 
     def get_path_with_ids(self):
         return '%d/%d/%s' % (self.album.id, self.id, self.name)
 
+    def get_file(self):
+        return open(self.get_specificPath())
 
 Albums.icon = db.relationship("Images", backref="images", remote_side=Images.id, foreign_keys=[Albums.icon_id])
 

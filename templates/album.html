@@ -3,7 +3,7 @@
 {#<a href="javascript:blueimp.Gallery($('#links a'), {})">123</a>#}
 <div id="links">
     {% for item in images %}
-        <a href="/f/{{ item.get_path_with_ids() }}" title="{{ item.get_path() }}">
+        <a href="/f/{{ item.get_path_with_ids() }}" title="{{ item.get_relativePath() }}" image-id="{{ item.id }}">
             <div class="file">
                 <img src="/th/{{ item.get_path_with_ids() }}" alt="{{ item.name }}">
 
@@ -29,7 +29,12 @@
             if (e.ctrlKey) {
                 e.preventDefault();
                 var j = getSelected();
-                var sel = {url: newVar.attr('href'), thumb: newVar.find('img').attr('src'), title: newVar.attr('title')};
+                var sel = {
+                    id:newVar.attr('image-id'),
+                    url: newVar.attr('href'),
+                    thumb: newVar.find('img').attr('src'),
+                    title: newVar.attr('title')
+            };
                 var set = $.map(j, function (a, index) {
                     return a.url;
                 });

@@ -109,14 +109,13 @@ def albums(t):
 @cache.cached(timeout=1 * 60 * 60)
 def get_image(type, album_id, image_id, image_name):
     image = Images.query.get_or_404(image_id)
-    path = image.get_path()
-    real_path = ROOT_DIR + path
-    file_io = open(real_path, 'rb')
+    path = image.get_specificPath()
+    file_io = open(path, 'rb')
     file_read = file_io.read()
     file_io.close()
     response = make_response(file_read)
     response.headers['Cache-Control'] = 'private, max-age=%d' % (60 * 60 * 24)
-    response.headers['Content-Type'] = mimetypes.guess_type(real_path)[0]
+    response.headers['Content-Type'] = mimetypes.guess_type(path)[0]
     response.headers['Content-Length'] = os.path.getsize(file_io.name)
     return response
 
@@ -125,9 +124,8 @@ def get_image(type, album_id, image_id, image_name):
 # @cache.cached(timeout=1 * 60 * 60)
 def get_thumb(album_id, image_id, image_name):
     image = Images.query.get_or_404(image_id)
-    path = image.get_path()
-    real_path = ROOT_DIR + path
-    image_open = Image.open(real_path)
+    path = image.get_specificPath()
+    image_open = Image.open(path)
     image_open.thumbnail((280, 280), resample=Image.ANTIALIAS)
     img_io = StringIO()
     image_open.save(img_io, 'JPEG', quality=70)
@@ -155,7 +153,25 @@ def folder_icon(t, album_id):
         return send_file(open(os.path.join(os.path.dirname(__file__), 'no-image.jpg')))
     return get_thumb(None, album.icon.id, album.icon.name)
 
+@app.route('/export.zip', methods=['get'])
+def export():
+    # sel = json.loads(request.form.get('selected'))
+    sel = request.args.get('ids', '')
+    sel = sel.split(',')
+    def generator():
+        z = zipstream.ZipFile(mode='w', compression=zipstream.ZIP_DEFLATED)
+        for j in sel:
+            image = Images.query.get(j)
+            z.write(image.get_specificPath(), image.name)
+
+        for chunk in z:
+            yield chunk
+
+    response = Response(generator(), mimetype='application/zip')
+    response.headers['Content-Disposition'] = 'attachment; filename={}'.format('files.zip')
+    return response
 
 if __name__ == '__main__':
     app.debug = True
     app.run(host='0.0.0.0')
+
