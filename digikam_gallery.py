@@ -2,21 +2,20 @@
 from StringIO import StringIO
 
 __author__ = 'araigorodskiy'
-import json
 import mimetypes
-import os
 import random
 from flask import Flask, render_template, request, Response, abort, send_file
 from flask.helpers import make_response
 from flask.ext.cache import Cache
 import zipstream
 from flask.ext.sqlalchemy import SQLAlchemy
+from os.path import expanduser
 
 from PIL import Image
 
 app = Flask(__name__)
-ROOT_DIR = u'/home/araigorodskiy/Изображения'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///%s/digikam4.db' % ROOT_DIR
+home = expanduser('~/.simple-gallery/digikam4.db')
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///%s' % home
 app.config['SQLALCHEMY_ECHO'] = True
 
 db = SQLAlchemy(app)
@@ -153,11 +152,13 @@ def folder_icon(t, album_id):
         return send_file(open(os.path.join(os.path.dirname(__file__), 'no-image.jpg')))
     return get_thumb(None, album.icon.id, album.icon.name)
 
+
 @app.route('/export.zip', methods=['get'])
 def export():
     # sel = json.loads(request.form.get('selected'))
     sel = request.args.get('ids', '')
     sel = sel.split(',')
+
     def generator():
         z = zipstream.ZipFile(mode='w', compression=zipstream.ZIP_DEFLATED)
         for j in sel:
@@ -170,6 +171,7 @@ def export():
     response = Response(generator(), mimetype='application/zip')
     response.headers['Content-Disposition'] = 'attachment; filename={}'.format('files.zip')
     return response
+
 
 if __name__ == '__main__':
     app.debug = True
