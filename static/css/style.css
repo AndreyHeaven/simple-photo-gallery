@@ -148,3 +148,15 @@ div[class*='folder']:before {
     padding-bottom: 5px;
     text-align: center;
 }
+
+.popover-content img{
+    max-width: 50px;
+    max-width: 50px;
+    cursor: pointer;
+}
+.popover-content img:hover {
+    opacity: 0.5;
+}
+.popover-content span {
+    text-overflow: ellipsis
+}

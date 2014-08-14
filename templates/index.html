@@ -1,0 +1,14 @@
+{% extends "main_layout.html" %}
+{% block content %}
+<h1>Simple gallery</h1>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-4" style="text-align: center"><a class="btn btn-primary btn-lg" href="/Albums/"><span
+                class="glyphicon glyphicon-th"></span> Альбомы</a></div>
+        <div class="col-md-4" style="text-align: center"><a class="btn btn-primary btn-lg" href="/Peoples/"><span
+                class="glyphicon glyphicon-user"></span> Люди</a></div>
+        <div class="col-md-4" style="text-align: center"><a class="btn btn-primary btn-lg" href="/Best/"><span
+                class="glyphicon glyphicon-star"></span> Оценки</a></div>
+    </div>
+</div>
+{% endblock %}

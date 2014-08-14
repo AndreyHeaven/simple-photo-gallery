@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    {% block head %}
+        <meta charset="UTF-8">
+        <title>Simple Photo Gallery</title>
+        {#    <link rel="stylesheet" href="/static/css/blueimp-gallery.min.css">#}
+        <link rel='stylesheet' href='/static/css/style.css'>
+
+        <link rel="stylesheet" href="http://blueimp.github.io/Gallery/css/blueimp-gallery.min.css">
+        <link rel="stylesheet"
+              href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/themes/south-street/jquery-ui.css"
+              id="theme">
+        <script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.0/jquery.min.js"></script>
+        <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js"></script>
+        <script src="http://blueimp.github.io/Gallery/js/jquery.blueimp-gallery.min.js"></script>
+        <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+
+        <!-- Latest compiled and minified CSS -->
+        <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+        <link rel='shortcut icon' type='image/x-icon' href="/static/favicon.ico">
+        <link rel='icon' type='image/x-icon' href="/static/favicon.ico">
+        <script>
+            function getSelected() {
+                var parse = JSON.parse(localStorage.getItem('selected'));
+                return  parse || [];
+            }
+            function updateSelectedCounter() {
+                var json = $.map(getSelected(), function (a, index) {
+                    return a.url;
+                });
+                $('#selected-value').text(json.length);
+                $('#links a').each(function () {
+                    $(this).find('div.file').removeClass('selected');
+                    if ($.inArray($(this).attr('href'), json) >= 0)
+                        $(this).find('div.file').addClass('selected')
+                });
+                $('.popover-content').html(getPopoverContent())
+            }
+            function getPopoverContent() {
+                json = getSelected()
+                res = '<ul class="list-unstyled">'
+                for (j in json)
+                    res += '<li><img src="' + json[j].thumb + '" data="' + j + '"/></li>';//<span>' + json[j].title + '</span>
+                res += '</ul>';
+                return res
+            }
+            function setSelected(json) {
+                var set = $.unique($.map(json, function (a, index) {
+                    return a.url;
+                }));
+                json = $.grep(json, function (value, index) {
+                    var url = value.url;
+                    var inArray = $.inArray(url, set);
+                    if (inArray >= 0) {
+                        set.splice(inArray, 1);
+                        return true
+                    } else
+                        return false
+                });
+                localStorage.setItem('selected', JSON.stringify(json));
+                updateSelectedCounter();
+            }
+            $(function () {
+                options = {content: function () {
+                    return getPopoverContent()
+                },
+                    placement: 'bottom',
+                    html: true}
+                $('#selected-value').popover(options);
+                updateSelectedCounter();
+                $('nav').delegate('.popover-content img', 'click', function () {
+                    var selected = getSelected();
+                    selected.splice($(this).attr('data'), 1);
+                    setSelected(selected);
+                });
+                {#          blueimp.Gallery($('#links a'), {onclosed:function(){#}
+                {#              history.back(1);#}
+                {#          }});#}
+                $('#export-btn').click(function () {
+                    $.post('/export.zip', {'selected': JSON.stringify(getSelected())},
+                            function (response, status, request) {
+                                var disp = request.getResponseHeader('Content-Disposition');
+                                if (disp && disp.search('attachment') != -1) {
+                                    var type = request.getResponseHeader('Content-Type');
+                                    var blob = new Blob([response], { type: type });
+
+                                    if (typeof window.navigator.msSaveBlob !== 'undefined') {
+                                        // IE workaround for "HTML7007: One or more blob URLs were revoked by closing the blob for which they were created. These URLs will no longer resolve as the data backing the URL has been freed."
+                                        window.navigator.msSaveBlob(blob);
+                                    } else {
+                                        var URL = window.URL || window.webkitURL;
+                                        var downloadUrl = URL.createObjectURL(blob);
+                                        window.location = downloadUrl;
+                                    }
+                                }
+                            })
+                });
+
+            })
+        </script>
+    {% endblock %}
+</head>
+<body>
+<nav class="navbar navbar-default" role="navigation">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <a class="navbar-brand" href="/"><span class="glyphicon glyphicon-home"/></a>
+            <span class="navbar-text">/</span>
+            <a class="navbar-brand" href="..">..</a>
+        </div>
+        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+            <ul class="nav navbar-nav navbar-right">
+                <li>
+                    <button id="selected-value" type="button" class="btn btn-default navbar-btn">0</button>
+                </li>
+                <li><p class="navbar-text">selected</p></li>
+                <li>
+                    <button type="button" class="btn btn-default navbar-btn" id="export-btn">Download
+                        selected
+                    </button>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+{% block content %}{% endblock %}
+</body>
+</html>
