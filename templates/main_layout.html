@@ -4,9 +4,7 @@
     {% block head %}
         <meta charset="UTF-8">
         <title>Simple Photo Gallery</title>
-        {#    <link rel="stylesheet" href="/static/css/blueimp-gallery.min.css">#}
         <link rel='stylesheet' href='/static/css/style.css'>
-
         <link rel="stylesheet" href="http://blueimp.github.io/Gallery/css/blueimp-gallery.min.css">
         <link rel="stylesheet"
               href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/themes/south-street/jquery-ui.css"
@@ -15,8 +13,7 @@
         <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js"></script>
         <script src="http://blueimp.github.io/Gallery/js/jquery.blueimp-gallery.min.js"></script>
         <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
-
-        <!-- Latest compiled and minified CSS -->
+        <link href='http://fonts.googleapis.com/css?family=Montserrat' rel='stylesheet' type='text/css'>
         <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
         <link rel='shortcut icon' type='image/x-icon' href="/static/favicon.ico">
         <link rel='icon' type='image/x-icon' href="/static/favicon.ico">
@@ -38,11 +35,11 @@
                 $('.popover-content').html(getPopoverContent())
             }
             function getPopoverContent() {
-                json = getSelected()
-                res = '<ul class="list-unstyled">'
+                var json = getSelected()
+                var res = '';
                 for (j in json)
-                    res += '<li><img src="' + json[j].thumb + '" data="' + j + '"/></li>';//<span>' + json[j].title + '</span>
-                res += '</ul>';
+                    res += '<img src="' + json[j].thumb + '" data="' + j + '"/>';//<span>' + json[j].title + '</span>
+                res += '';
                 return res
             }
             function setSelected(json) {
@@ -62,6 +59,11 @@
                 updateSelectedCounter();
             }
             $(function () {
+                $(document).keyup(function (e) {
+                    if (e.keyCode == 27) {
+                        history.back(1);
+                    }
+                });
                 options = {content: function () {
                     return getPopoverContent()
                 },
@@ -74,37 +76,13 @@
                     selected.splice($(this).attr('data'), 1);
                     setSelected(selected);
                 });
-                {#          blueimp.Gallery($('#links a'), {onclosed:function(){#}
-                {#              history.back(1);#}
-                {#          }});#}
                 $('#export-btn').click(function () {
                     var json = $.map(getSelected(), function (a, index) {
                         return a.id;
                     });
+                    setSelected([]);
                     window.location = '/export.zip?ids=' + json.join();
-                    {#                    var btn = $(this);#}
-                    {#                    btn.button('loading');#}
-                    {#                    $.get('/export.zip', {'selected': JSON.stringify(getSelected())},#}
-                    {#                            function (response, status, request) {#}
-                    {#                                var disp = request.getResponseHeader('Content-Disposition');#}
-                    {#                                if (disp && disp.search('attachment') != -1) {#}
-                    {#                                    var type = request.getResponseHeader('Content-Type');#}
-                    {#                                    var blob = new Blob([response], { type: type });#}
-                    {##}
-                    {#                                    if (typeof window.navigator.msSaveBlob !== 'undefined') {#}
-                    {#                                        // IE workaround for "HTML7007: One or more blob URLs were revoked by closing the blob for which they were created. These URLs will no longer resolve as the data backing the URL has been freed."#}
-                    {#                                        window.navigator.msSaveBlob(blob);#}
-                    {#                                    } else {#}
-                    {#                                        var URL = window.URL || window.webkitURL;#}
-                    {#                                        var downloadUrl = URL.createObjectURL(blob);#}
-                    {#                                        window.location = downloadUrl;#}
-                    {#                                    }#}
-                    {#                                }#}
-                    {#                            }).always(function () {#}
-                    {#                                btn.button('reset')#}
-                    {#                            });#}
                 });
-
             })
         </script>
     {% endblock %}

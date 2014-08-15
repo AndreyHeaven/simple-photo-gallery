@@ -8,7 +8,7 @@
 {% for item in albums %}
     <a href="{{ item.get_link() }}">
         <div class='folder_{{ rand(classs) }}'>
-            <img src="{{ item.get_link() }}folder_icon.jpg"/>
+            <img class="thumb" src="{{ item.get_link() }}folder_icon.jpg"/>
 
             <div class="desc">{{ item.get_name() }}</div>
         </div>

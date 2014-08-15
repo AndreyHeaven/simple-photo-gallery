@@ -104,9 +104,9 @@ def albums(t):
                            albums=query)
 
 
-@app.route('/f/<type>/<album_id>/<image_id>/<image_name>')
+@app.route('/f/<image_id>/<image_name>')
 @cache.cached(timeout=1 * 60 * 60)
-def get_image(type, album_id, image_id, image_name):
+def get_image(image_id, image_name):
     image = Images.query.get_or_404(image_id)
     path = image.get_specificPath()
     file_io = open(path, 'rb')
@@ -119,9 +119,9 @@ def get_image(type, album_id, image_id, image_name):
     return response
 
 
-@app.route('/th/<album_id>/<image_id>/<image_name>')
+@app.route('/th/<image_id>/<image_name>')
 # @cache.cached(timeout=1 * 60 * 60)
-def get_thumb(album_id, image_id, image_name):
+def get_thumb(image_id, image_name):
     image = Images.query.get_or_404(image_id)
     path = image.get_specificPath()
     image_open = Image.open(path)
@@ -155,9 +155,10 @@ def folder_icon(t, album_id):
 
 @app.route('/export.zip', methods=['get'])
 def export():
-    # sel = json.loads(request.form.get('selected'))
     sel = request.args.get('ids', '')
     sel = sel.split(',')
+    if len(sel) == 0 or sel[0] == '':
+        abort(400)
 
     def generator():
         z = zipstream.ZipFile(mode='w', compression=zipstream.ZIP_DEFLATED)

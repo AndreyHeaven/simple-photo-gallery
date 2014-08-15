@@ -1,58 +1,58 @@
 {% extends "main_layout.html" %}
 {% block content %}
-{#<a href="javascript:blueimp.Gallery($('#links a'), {})">123</a>#}
-<div id="links">
-    {% for item in images %}
-        <a href="/f/{{ item.get_path_with_ids() }}" title="{{ item.get_relativePath() }}" image-id="{{ item.id }}">
-            <div class="file">
-                <img src="/th/{{ item.get_path_with_ids() }}" alt="{{ item.name }}">
+    {#<a href="javascript:blueimp.Gallery($('#links a'), {})">123</a>#}
+    <div id="links">
+        {% for item in images %}
+            <a href="/f/{{ item.get_path_with_ids() }}" title="{{ item.get_relativePath() }}" image-id="{{ item.id }}">
+                <div class="file">
+                    <img class="thumb" src="/th/{{ item.get_path_with_ids() }}" alt="{{ item.name }}">
 
-                <div class="desc">{{ item.name }}</div>
-            </div>
-        </a>
-    {% endfor %}
-</div>
-<div id="blueimp-gallery" class="blueimp-gallery">
-    <div class="slides"></div>
-    <h3 class="title"></h3>
-    <a class="prev">‹</a>
-    <a class="next">›</a>
-    <a class="close">×</a>
-    <a class="play-pause"></a>
-    {#    <ol class="indicator"></ol>#}
-</div>
-{#<script src="/static/js/jquery.image-gallery.min.js"></script>#}
-<script>
-    $(function () {
-        $('#links a').bind('click', function (e) {
-            var newVar = $(this);
-            if (e.ctrlKey) {
-                e.preventDefault();
-                var j = getSelected();
-                var sel = {
-                    id:newVar.attr('image-id'),
-                    url: newVar.attr('href'),
-                    thumb: newVar.find('img').attr('src'),
-                    title: newVar.attr('title')
-            };
-                var set = $.map(j, function (a, index) {
-                    return a.url;
-                });
-                var inArray = $.inArray(sel.url, set);
-                if (inArray >= 0)
-                    j.splice(inArray, 1);
-                else
-                    j.push(sel);
-                setSelected(j);
-            } else {
-                var options = {index: newVar, event: event}
-                var links = $('#links a');
-                blueimp.Gallery(links, options);
-            }
-        });
+                    <div class="desc">{{ item.name }}</div>
+                </div>
+            </a>
+        {% endfor %}
+    </div>
+    <div id="blueimp-gallery" class="blueimp-gallery">
+        <div class="slides"></div>
+        <h3 class="title"></h3>
+        <a class="prev">‹</a>
+        <a class="next">›</a>
+        <a class="close">×</a>
+        <a class="play-pause"></a>
+        {#    <ol class="indicator"></ol>#}
+    </div>
+    {#<script src="/static/js/jquery.image-gallery.min.js"></script>#}
+    <script>
+        $(function () {
+            $('#links a').bind('click', function (e) {
+                var newVar = $(this);
+                if (e.ctrlKey) {
+                    e.preventDefault();
+                    var j = getSelected();
+                    var sel = {
+                        id: newVar.attr('image-id'),
+                        url: newVar.attr('href'),
+                        thumb: newVar.find('img').attr('src'),
+                        title: newVar.attr('title')
+                    };
+                    var set = $.map(j, function (a, index) {
+                        return a.url;
+                    });
+                    var inArray = $.inArray(sel.url, set);
+                    if (inArray >= 0)
+                        j.splice(inArray, 1);
+                    else
+                        j.push(sel);
+                    setSelected(j);
+                } else {
+                    var options = {index: newVar[0], event: e}
+                    var links = $('#links a');
+                    blueimp.Gallery(links, options);
+                }
+            });
 
-    })
-</script>
+        })
+    </script>
 {% endblock %}
 </body>
 </html>

@@ -43,7 +43,7 @@ class Images(db.Model):
         return self.album.albumRoot.specificPath + self.album.relativePath + '/' + self.name
 
     def get_path_with_ids(self):
-        return '%d/%d/%s' % (self.album.id, self.id, self.name)
+        return '%d/%s' % (self.id, self.name)
 
     def get_file(self):
         return open(self.get_specificPath())
