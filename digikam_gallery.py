@@ -150,7 +150,7 @@ def folder_icon(t, album_id):
         abort(404)
     if album is None or album.icon is None:
         return send_file(open(os.path.join(os.path.dirname(__file__), 'no-image.jpg')))
-    return get_thumb(None, album.icon.id, album.icon.name)
+    return get_thumb(album.icon.id, album.icon.name)
 
 
 @app.route('/export.zip', methods=['get'])

@@ -3,15 +3,18 @@
     {{ super() }}
     <link rel='stylesheet' href='/css/css.css'>
 {% endblock %}
+{% block breadcrumb %}
+    <a class="navbar-brand" href="/"><span class="glyphicon glyphicon-home"/></a>
+{% endblock %}
 {% block content %}
-{% set classs = range(11) %}
-{% for item in albums %}
-    <a href="{{ item.get_link() }}">
-        <div class='folder_{{ rand(classs) }}'>
-            <img class="thumb" src="{{ item.get_link() }}folder_icon.jpg"/>
+    {% set classs = range(11) %}
+    {% for item in albums %}
+        <a href="{{ item.get_link() }}">
+            <div class='folder_{{ rand(classs) }}'>
+                <img class="thumb" src="{{ item.get_link() }}folder_icon.jpg"/>
 
-            <div class="desc">{{ item.get_name() }}</div>
-        </div>
-    </a>
-{% endfor %}
+                <div class="desc">{{ item.get_name() }}</div>
+            </div>
+        </a>
+    {% endfor %}
 {% endblock %}

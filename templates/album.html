@@ -1,4 +1,9 @@
 {% extends "main_layout.html" %}
+{% block breadcrumb %}
+    <a class="navbar-brand" href="/"><span class="glyphicon glyphicon-home"/></a>
+    <span class="navbar-text">/</span>
+    <a class="navbar-brand" href="..">..</a>
+{% endblock %}
 {% block content %}
     {#<a href="javascript:blueimp.Gallery($('#links a'), {})">123</a>#}
     <div id="links">
