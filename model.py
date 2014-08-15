@@ -33,6 +33,7 @@ class Images(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.Text())
     status = db.Column(db.Integer)
+    category = db.Column(db.Integer)
     album_id = db.Column('album', db.Integer, db.ForeignKey('albums.id'))
     album = db.relationship("Albums", backref="images", remote_side=Albums.id, foreign_keys=[album_id])
 
@@ -47,6 +48,19 @@ class Images(db.Model):
 
     def get_file(self):
         return open(self.get_specificPath())
+
+    @classmethod
+    def get_by_album(cls, id):
+        return cls.query.filter(cls.album_id == id, cls.status == 1, cls.category == 1)
+
+    @classmethod
+    def get_by_people_tag(cls,id):
+        return cls.query.join(ImageTags, ImageTags.imageid == Images.id).filter(ImageTags.tagid == id, cls.status == 1, cls.category == 1)
+
+    @classmethod
+    def get_by_rating(cls, id):
+        return cls.query.join(ImageInformation, ImageInformation.imageid == cls.id).filter(
+            ImageInformation.rating == id).filter(cls.status == 1, cls.category == 1)
 
 Albums.icon = db.relationship("Images", backref="images", remote_side=Images.id, foreign_keys=[Albums.icon_id])
 

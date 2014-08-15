@@ -7,14 +7,31 @@
     <a class="navbar-brand" href="/"><span class="glyphicon glyphicon-home"/></a>
 {% endblock %}
 {% block content %}
+    <div class="form-group" style="padding: 0 20px">
+        <input type="text" class="form-control" placeholder="Filter" id="filter">
+    </div>
+    <script>
+    $(function(){
+        $('#filter').keyup(function(){
+            var text = $('#filter').val();
+            $('#albums a').each(function(){
+                var it = $(this);
+                it.css('display',it.attr('title').indexOf(text)==0?'':'none');
+            });
+        })
+    })
+    </script>
+    <div id="albums">
     {% set classs = range(11) %}
     {% for item in albums %}
-        <a href="{{ item.get_link() }}">
+        <a href="{{ item.get_link() }}" title="{{ item.get_name() }}">
             <div class='folder_{{ rand(classs) }}'>
                 <img class="thumb" src="{{ item.get_link() }}folder_icon.jpg"/>
-
-                <div class="desc">{{ item.get_name() }}</div>
+                {% if item.get_name() %}
+                    <div class="desc">{{ item.get_name() }}</div>
+                {% endif %}
             </div>
         </a>
     {% endfor %}
+    </div>
 {% endblock %}

@@ -16,7 +16,7 @@ from PIL import Image
 app = Flask(__name__)
 home = expanduser('~/.simple-gallery/digikam4.db')
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///%s' % home
-app.config['SQLALCHEMY_ECHO'] = True
+# app.config['SQLALCHEMY_ECHO'] = True
 
 db = SQLAlchemy(app)
 cache = Cache(app, config={'CACHE_TYPE': 'simple'})
@@ -63,17 +63,17 @@ def index():
     return render_template('index.html')
 
 
-@app.route('/<t>/<int:tag_id>/')
-def peoples_files(t, tag_id):
+@app.route('/<t>/<folder_id>/')
+def peoples_files(t, folder_id):
     q = []
     if t == 'Albums':
-        q = Images.query.filter(Images.album_id == tag_id)
+        q = Images.get_by_album(folder_id)
     elif t == 'Peoples':
-        q = Images.query.join(ImageTags, ImageTags.imageid == Images.id).filter(ImageTags.tagid == tag_id)
+        q = Images.get_by_people_tag(folder_id)
     elif t == 'Best':
-        if tag_id == 0: tag_id = -1
-        q = Images.query.join(ImageInformation, ImageInformation.imageid == Images.id).filter(
-            ImageInformation.rating == tag_id).filter(Images.status == 1)
+        if folder_id == 0:
+            folder_id = -1
+        q = Images.get_by_rating(folder_id)
     else:
         abort(400)
     return render_template('album.html', images=q)
@@ -148,9 +148,17 @@ def folder_icon(t, album_id):
         album = Tags.query.get(album_id)
     else:
         abort(404)
-    if album is None or album.icon is None:
-        return send_file(open(os.path.join(os.path.dirname(__file__), 'no-image.jpg')))
-    return get_thumb(album.icon.id, album.icon.name)
+    album_icon = album.icon
+    if album is None or album_icon is None:
+        if t == 'Albums':
+            album_icon = Images.get_by_album(album_id).first()
+        elif t == 'Peoples':
+            album_icon = Images.get_by_people_tag(album_id).first()
+        elif t == 'Best':
+            album_icon = Images.get_by_rating(album_id).first()
+        else:
+            abort(404)
+    return get_thumb(album_icon.id, album_icon.name)
 
 
 @app.route('/export.zip', methods=['get'])
