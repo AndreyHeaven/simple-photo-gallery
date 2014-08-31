@@ -64,6 +64,7 @@ def index():
 
 
 @app.route('/<t>/<folder_id>/')
+@cache.cached(timeout=1*60*60)
 def peoples_files(t, folder_id):
     q = []
     if t == 'Albums':
@@ -80,10 +81,11 @@ def peoples_files(t, folder_id):
 
 
 @app.route('/<t>/')
+@cache.cached(timeout=1*60*60)
 def albums(t):
     query = []
     if t == 'Albums':
-        query = Albums.query.filter(Albums.albumRoot_id > 0)
+        query = Albums.query.filter(Albums.albumRoot_id > 0).filter(not_(Albums.relativePath.contains(IGNORE_FOLDERS[0])))
     elif t == 'Peoples':
         query = Tags.query.join(TagProperties, TagProperties.tagid == Tags.id) \
             .filter(TagProperties.property == 'kfaceId')
@@ -120,7 +122,7 @@ def get_image(image_id, image_name):
 
 
 @app.route('/th/<image_id>/<image_name>')
-# @cache.cached(timeout=1 * 60 * 60)
+@cache.cached(timeout=1 * 60 * 60)
 def get_thumb(image_id, image_name):
     image = Images.query.get_or_404(image_id)
     path = image.get_specificPath()
@@ -138,6 +140,7 @@ def get_thumb(image_id, image_name):
 
 
 @app.route('/<t>/<album_id>/folder_icon.jpg')
+@cache.cached(timeout=1*60*60)
 def folder_icon(t, album_id):
     album = None
     if t == 'Albums':

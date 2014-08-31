@@ -2,6 +2,7 @@ import os
 from digikam_gallery import db
 
 __author__ = 'araigorodskiy'
+IGNORE_FOLDERS = ['/983db650f7f79bc8e87d9a3ba418aefc','/Originals']
 
 class AlbumRoots(db.Model):
     __tablename__ = 'AlbumRoots'
