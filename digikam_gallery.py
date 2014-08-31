@@ -8,13 +8,16 @@ from flask import Flask, render_template, request, Response, abort, send_file
 from flask.helpers import make_response
 from flask.ext.cache import Cache
 import zipstream
+from sqlalchemy.sql import and_, or_, not_
 from flask.ext.sqlalchemy import SQLAlchemy
 from os.path import expanduser
-
+import os
 from PIL import Image
 
 app = Flask(__name__)
 home = expanduser('~/.simple-gallery/digikam4.db')
+if not os.path.exists(os.path.dirname(home)):
+    os.mkdir(os.path.dirname(home))
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///%s' % home
 # app.config['SQLALCHEMY_ECHO'] = True
 
@@ -65,7 +68,7 @@ def index():
 
 @app.route('/<t>/<folder_id>/')
 @cache.cached(timeout=1*60*60)
-def peoples_files(t, folder_id):
+def files(t, folder_id):
     q = []
     if t == 'Albums':
         q = Images.get_by_album(folder_id)
@@ -85,7 +88,10 @@ def peoples_files(t, folder_id):
 def albums(t):
     query = []
     if t == 'Albums':
-        query = Albums.query.filter(Albums.albumRoot_id > 0).filter(not_(Albums.relativePath.contains(IGNORE_FOLDERS[0])))
+        conditions = []
+        for term in IGNORE_FOLDERS:
+            conditions.append(Albums.relativePath.ilike(term))
+        query = Albums.query.filter(and_(Albums.albumRoot_id > 0, not_(or_(*conditions))))
     elif t == 'Peoples':
         query = Tags.query.join(TagProperties, TagProperties.tagid == Tags.id) \
             .filter(TagProperties.property == 'kfaceId')
