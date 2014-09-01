@@ -67,7 +67,7 @@ def index():
 
 
 @app.route('/<t>/<folder_id>/')
-@cache.cached(timeout=1*60*60)
+@cache.cached(timeout=1 * 60 * 60)
 def files(t, folder_id):
     q = []
     if t == 'Albums':
@@ -84,7 +84,7 @@ def files(t, folder_id):
 
 
 @app.route('/<t>/')
-@cache.cached(timeout=1*60*60)
+@cache.cached(timeout=1 * 60 * 60)
 def albums(t):
     query = []
     if t == 'Albums':
@@ -117,14 +117,27 @@ def albums(t):
 def get_image(image_id, image_name):
     image = Images.query.get_or_404(image_id)
     path = image.get_specificPath()
-    file_io = open(path, 'rb')
-    file_read = file_io.read()
-    file_io.close()
-    response = make_response(file_read)
-    response.headers['Cache-Control'] = 'private, max-age=%d' % (60 * 60 * 24)
-    response.headers['Content-Type'] = mimetypes.guess_type(path)[0]
-    response.headers['Content-Length'] = os.path.getsize(file_io.name)
-    return response
+    # file_io = open(path, 'rb')
+    # file_read = file_io.read()
+    # file_io.close()
+    # response = make_response(file_read)
+    # response.headers['Cache-Control'] = 'private, max-age=%d' % (60 * 60 * 24)
+    # response.headers['Content-Type'] = mimetypes.guess_type(path)[0]
+    # response.headers['Content-Length'] = os.path.getsize(file_io.name)
+    # return response
+    img = Image.open(path)
+    i = 1200
+    if img.size[0] > img.size[1]:
+        aspect = img.size[1] / float(i)
+        new_size = (int(img.size[0] / aspect), i)
+    else:
+        aspect = img.size[0] / float(i)
+        new_size = (i, int(img.size[1] / aspect))
+    img.resize(new_size, resample=Image.ANTIALIAS)
+    img_io = StringIO()
+    img.save(img_io, 'JPEG', quality=70)
+    img_io.seek(0)
+    return send_file(img_io, mimetype='image/jpeg', cache_timeout=(60 * 60 * 24))
 
 
 @app.route('/th/<image_id>/<image_name>')
@@ -132,12 +145,12 @@ def get_image(image_id, image_name):
 def get_thumb(image_id, image_name):
     image = Images.query.get_or_404(image_id)
     path = image.get_specificPath()
-    image_open = Image.open(path)
-    image_open.thumbnail((280, 280), resample=Image.ANTIALIAS)
+    img = Image.open(path)
+    img.thumbnail((280, 280), resample=Image.NEAREST)
     img_io = StringIO()
-    image_open.save(img_io, 'JPEG', quality=70)
+    img.save(img_io, 'JPEG', quality=70)
     img_io.seek(0)
-    return send_file(img_io, mimetype='image/jpeg')
+    return send_file(img_io, mimetype='image/jpeg', cache_timeout=(60 * 60 * 24))
     # response = make_response(file_read)
     # response.headers['Cache-Control'] = 'private, max-age=%d' % (60 * 60 * 24)
     # response.headers['Content-Type'] = mimetypes.guess_type(real_path)[0]
@@ -146,7 +159,7 @@ def get_thumb(image_id, image_name):
 
 
 @app.route('/<t>/<album_id>/folder_icon.jpg')
-@cache.cached(timeout=1*60*60)
+@cache.cached(timeout=1 * 60 * 60)
 def folder_icon(t, album_id):
     album = None
     if t == 'Albums':
