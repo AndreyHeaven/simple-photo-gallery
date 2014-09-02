@@ -1,8 +1,9 @@
-import os
+# -*- coding: utf-8 -*-
 from digikam_gallery import db
 
 __author__ = 'araigorodskiy'
-IGNORE_FOLDERS = ['%/983db650f7f79bc8e87d9a3ba418aefc','%/Originals']
+IGNORE_FOLDERS = ['%/983db650f7f79bc8e87d9a3ba418aefc', '%/Originals']
+
 
 class AlbumRoots(db.Model):
     __tablename__ = 'AlbumRoots'
@@ -25,9 +26,7 @@ class Albums(db.Model):
         return self.relativePath[1:]
 
     def get_path(self):
-        return '%s%s' %(self.albumRoot.specificPath, self.relativePath)
-
-
+        return '%s%s' % (self.albumRoot.specificPath, self.relativePath)
 
 
 class Images(db.Model):
@@ -55,13 +54,15 @@ class Images(db.Model):
         return cls.query.filter(cls.album_id == id, cls.status == 1, cls.category == 1)
 
     @classmethod
-    def get_by_people_tag(cls,id):
-        return cls.query.join(ImageTags, ImageTags.imageid == Images.id).filter(ImageTags.tagid == id, cls.status == 1, cls.category == 1)
+    def get_by_people_tag(cls, id):
+        return cls.query.join(ImageTags, ImageTags.imageid == Images.id).filter(ImageTags.tagid == id, cls.status == 1,
+                                                                                cls.category == 1)
 
     @classmethod
     def get_by_rating(cls, id):
         return cls.query.join(ImageInformation, ImageInformation.imageid == cls.id).filter(
             ImageInformation.rating == id).filter(cls.status == 1, cls.category == 1)
+
 
 Albums.icon = db.relationship("Images", backref="images", remote_side=Images.id, foreign_keys=[Albums.icon_id])
 
@@ -99,13 +100,19 @@ class ImageInformation(db.Model):
     rating = db.Column(db.Integer)
 
 
+def get_r(i):
+    return [u'Без оценки', u'1', u'2', u'3', u'4', u'5', ][i]
+
+
+
 class Ratings():
     def __init__(self, rating, name):
         self.rating = rating
         self.name = name
-
     def get_link(self):
         return '%d/' % self.rating
 
     def get_name(self):
         return self.name
+
+RATINGS = [[Ratings(i, get_r(i)) for i in range(5)]]

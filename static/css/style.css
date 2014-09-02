@@ -35,30 +35,37 @@ a {
 div[class*='folder'] {
     float: left;
     position: relative;
-    margin: 50px;
+    margin: 40px;
 }
 
 div[class*='folder'], div[class*='folder']:before, div[class*='folder']:after {
     border: 6px solid #fff;
     background-color: #fff;
-    height: 292px;
-    width: 292px;
+    height: 212px;
+    width: 212px;
     -webkit-box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
     -moz-box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
     box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
 }
 
+#content-wrapper {
+    position: relative;
+    width: 952px;
+    margin: 0 auto 40px;
+    padding: 0 10px;
+}
+
 div[class*='file'] {
     float: left;
     position: relative;
-    margin: 50px;
-    border: 6px solid #fff;
-    width: 292px;
-    height: 292px;
+    /*margin: 5px;*/
+    /*border: 6px solid #fff;*/
+    width: 105px;
+    height: 105px;
 
-    -webkit-box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
-    -moz-box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
-    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
+    /*-webkit-box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);*/
+    /*-moz-box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);*/
+    /*box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);*/
 }
 
 div[class*='folder'] img, div.file img {

@@ -3,16 +3,19 @@
     <a class="navbar-brand" href="/"><span class="glyphicon glyphicon-home"/></a>
     <span class="navbar-text">/</span>
     <a class="navbar-brand" href="..">..</a>
+    <ul class="nav navbar-nav navbar-right">
+        <li><button type="button" class="btn btn-default navbar-btn" id="export-album-btn" data-loading-text="Loading...">Download album</button></li>
+    </ul>
 {% endblock %}
 {% block content %}
     {#<a href="javascript:blueimp.Gallery($('#links a'), {})">123</a>#}
+    <div id="folder-title"><h3>{{ album.get_name() }}</h3></div>
     <div id="links">
         {% for item in images %}
             <a href="/f/{{ item.get_path_with_ids() }}" title="{{ item.get_relativePath() }}" image-id="{{ item.id }}">
                 <div class="file">
                     <img class="thumb" src="/th/{{ item.get_path_with_ids() }}" alt="{{ item.name }}">
-
-                    <div class="desc">{{ item.name }}</div>
+{#                    <div class="desc">{{ item.name }}</div>#}
                 </div>
             </a>
         {% endfor %}
@@ -55,7 +58,9 @@
                     blueimp.Gallery(links, options);
                 }
             });
-
+            $('#export-album-btn').click(function(){
+                window.location = 'export.zip';
+            })
         })
     </script>
 {% endblock %}

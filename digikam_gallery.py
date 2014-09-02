@@ -14,6 +14,8 @@ from os.path import expanduser
 import os
 from PIL import Image
 
+DEFAULT_CACHE_TIMEOUT = 1 * 60 * 60
+
 app = Flask(__name__)
 home = expanduser('~/.simple-gallery/digikam4.db')
 if not os.path.exists(os.path.dirname(home)):
@@ -22,7 +24,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///%s' % home
 # app.config['SQLALCHEMY_ECHO'] = True
 
 db = SQLAlchemy(app)
-cache = Cache(app, config={'CACHE_TYPE': 'simple'})
+cache = Cache(app, config={'CACHE_TYPE': 'filesystem','CACHE_DIR':os.path.join(os.path.dirname(home),'cache')})
 
 from model import *
 
@@ -67,24 +69,27 @@ def index():
 
 
 @app.route('/<t>/<folder_id>/')
-@cache.cached(timeout=1 * 60 * 60)
+@cache.cached(timeout=DEFAULT_CACHE_TIMEOUT)
 def files(t, folder_id):
     q = []
     if t == 'Albums':
+        alb = Albums.query.get(folder_id)
         q = Images.get_by_album(folder_id)
     elif t == 'Peoples':
+        alb = Tags.query.get(folder_id)
         q = Images.get_by_people_tag(folder_id)
     elif t == 'Best':
+        alb = RATINGS[folder_id]
         if folder_id == 0:
             folder_id = -1
         q = Images.get_by_rating(folder_id)
     else:
         abort(400)
-    return render_template('album.html', images=q)
+    return render_template('album.html', images=q, album=alb)
 
 
 @app.route('/<t>/')
-@cache.cached(timeout=1 * 60 * 60)
+@cache.cached(timeout=DEFAULT_CACHE_TIMEOUT)
 def albums(t):
     query = []
     if t == 'Albums':
@@ -96,14 +101,7 @@ def albums(t):
         query = Tags.query.join(TagProperties, TagProperties.tagid == Tags.id) \
             .filter(TagProperties.property == 'kfaceId')
     elif t == 'Best':
-        query = [
-            Ratings(0, u'Без оценки'),
-            Ratings(1, u'1'),
-            Ratings(2, u'2'),
-            Ratings(3, u'3'),
-            Ratings(4, u'4'),
-            Ratings(5, u'5'),
-        ]
+        query = RATINGS
     else:
         abort(400)
 
@@ -113,7 +111,7 @@ def albums(t):
 
 
 @app.route('/f/<image_id>/<image_name>')
-@cache.cached(timeout=1 * 60 * 60)
+@cache.cached(timeout=DEFAULT_CACHE_TIMEOUT)
 def get_image(image_id, image_name):
     image = Images.query.get_or_404(image_id)
     path = image.get_specificPath()
@@ -140,17 +138,32 @@ def get_image(image_id, image_name):
     return send_file(img_io, mimetype='image/jpeg', cache_timeout=(60 * 60 * 24))
 
 
-@app.route('/th/<image_id>/<image_name>')
-@cache.cached(timeout=1 * 60 * 60)
-def get_thumb(image_id, image_name):
+def crop_to_square(img):
+    width, height = img.size  # Get dimensions
+    new_width, new_height = max(width, height), min(width, height)
+    left = (width - new_height) / 2
+    top = (height - new_height) / 2
+    right = (width + new_height) / 2
+    bottom = (height + new_height) / 2
+    return img.crop((left, top, right, bottom))
+
+
+def _get_thumb(image_id,h):
     image = Images.query.get_or_404(image_id)
     path = image.get_specificPath()
     img = Image.open(path)
-    img.thumbnail((280, 280), resample=Image.NEAREST)
+    img = crop_to_square(img)
+    img.thumbnail((h, h), resample=Image.NEAREST)
     img_io = StringIO()
     img.save(img_io, 'JPEG', quality=70)
     img_io.seek(0)
     return send_file(img_io, mimetype='image/jpeg', cache_timeout=(60 * 60 * 24))
+
+
+@app.route('/th/<image_id>/<image_name>')
+@cache.cached(timeout=DEFAULT_CACHE_TIMEOUT)
+def get_thumb(image_id, image_name):
+    return _get_thumb(image_id,100)
     # response = make_response(file_read)
     # response.headers['Cache-Control'] = 'private, max-age=%d' % (60 * 60 * 24)
     # response.headers['Content-Type'] = mimetypes.guess_type(real_path)[0]
@@ -158,8 +171,10 @@ def get_thumb(image_id, image_name):
     # return response
 
 
+
+
 @app.route('/<t>/<album_id>/folder_icon.jpg')
-@cache.cached(timeout=1 * 60 * 60)
+@cache.cached(timeout=DEFAULT_CACHE_TIMEOUT)
 def folder_icon(t, album_id):
     album = None
     if t == 'Albums':
@@ -180,20 +195,15 @@ def folder_icon(t, album_id):
             album_icon = Images.get_by_rating(album_id).first()
         else:
             abort(404)
-    return get_thumb(album_icon.id, album_icon.name)
+    if album_icon is None:
+        return abort(404)
+    return _get_thumb(album_icon.id, 200)
 
 
-@app.route('/export.zip', methods=['get'])
-def export():
-    sel = request.args.get('ids', '')
-    sel = sel.split(',')
-    if len(sel) == 0 or sel[0] == '':
-        abort(400)
-
+def zip_images(images):
     def generator():
-        z = zipstream.ZipFile(mode='w', compression=zipstream.ZIP_DEFLATED)
-        for j in sel:
-            image = Images.query.get(j)
+        z = zipstream.ZipFile(mode='w', compression=zipstream.ZIP_STORED)
+        for image in images:
             z.write(image.get_specificPath(), image.name)
 
         for chunk in z:
@@ -202,6 +212,32 @@ def export():
     response = Response(generator(), mimetype='application/zip')
     response.headers['Content-Disposition'] = 'attachment; filename={}'.format('files.zip')
     return response
+
+
+@app.route('/export.zip', methods=['get'])
+def export():
+    sel = request.args.get('ids', '')
+    sel = sel.split(',')
+    if len(sel) == 0 or sel[0] == '':
+        abort(400)
+    images = Images.query.filter(Images.id.in_(sel))
+    return zip_images(images)
+
+@app.route('/<t>/<folder_id>/export.zip')
+@cache.cached(timeout=DEFAULT_CACHE_TIMEOUT)
+def export_album(t,folder_id):
+    q = []
+    if t == 'Albums':
+        q = Images.get_by_album(folder_id)
+    elif t == 'Peoples':
+        q = Images.get_by_people_tag(folder_id)
+    elif t == 'Best':
+        if folder_id == 0:
+            folder_id = -1
+        q = Images.get_by_rating(folder_id)
+    else:
+        abort(400)
+    return zip_images(q)
 
 
 if __name__ == '__main__':
